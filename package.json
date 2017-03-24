@@ -1,0 +1,16 @@
+{
+  "name": "sheller",
+  "version": "1.0.0",
+  "description": "A small testing bot designed to run like B1nzy's \"Root Me\"",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node index.js"
+  },
+  "author": "heatingdevice",
+  "license": "MIT",
+  "dependencies": {
+    "discord.io": "^2.5.1",
+    "lxc": "^0.1.1"
+  }
+}
