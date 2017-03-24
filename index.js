@@ -1,3 +1,5 @@
+let vmname = 'b1nzy-16.04';
+
 try {
   var tokens = require('./secrets.json');
 } catch(e) {
@@ -27,7 +29,7 @@ bot.on('disconnect', function(err, code) {
 
 bot.on('ready', function() {
   console.log("Successfully connected: " + bot.username + " - (" + bot.id + ")");
-  lxc.start('b1nzy', function(msg, msg2, msg3) {
+  lxc.start(vmname, function(msg, msg2, msg3) {
     say("Bot ready :+1:", 294737039054733312); // #bots
   });
 });
@@ -57,7 +59,7 @@ bot.on('message', function (user, userID, channelID, message, event) {
     }
     let cmd2 = cmd.join(" ");
     let begin = new Date().getTime(); // More accurate reading this way ;)
-    lxc.attach('b1nzy', "bash -c '" + cmd2 + "'", function(out, out2, out3) {
+    lxc.attach(vmname, "bash -c '" + cmd2 + "'", function(out, out2, out3) {
       say("```\n" + out2 + "```" + String(new Date().getTime() - begin) + "MS", c);
     });
   }
@@ -67,9 +69,9 @@ bot.on('message', function (user, userID, channelID, message, event) {
       return false;
     }
     say(":ok_hand: Please wait a moment while the VM shuts down **AND GETS BOMBARDED WITH THE CONCENTRATED ESSENCE OF JAKE** :boom:", c);
-    lxc.stop("b1nzy", function() {
+    lxc.stop(vmname, function() {
       exec("lxc-snapshot -n b1nzy -r snap0", function(err, stdout, stderr) { // Weird bug in the lib makes us use exec... Idk why tho...
-        lxc.start("b1nzy", function(err,resp) {
+        lxc.start(vmname, function(err,resp) {
           console.log(err, resp, "started");
           say("Done causing irreperable damage! :wink:", c);
           resetting = false;
@@ -79,8 +81,8 @@ bot.on('message', function (user, userID, channelID, message, event) {
   }
   if(t == "<reboot" || t == ">reboot") {
     say(":alarm_clock: Deleting Jake-limits... Just a sec...", c);
-    lxc.stop("b1nzy", function(err, resp) {
-      lxc.start("b1nzy", function(err1, resp1) {
+    lxc.stop(vmname, function(err, resp) {
+      lxc.start(vmname, function(err1, resp1) {
         say(":boom: Exploded Jake-limits and in the process restarted the VM.", c);
       });
     });
