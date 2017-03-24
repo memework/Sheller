@@ -15,6 +15,7 @@ try {
   console.log("You need to run `npm i` first!");
   return;
 }
+
 var bot = new Discord.Client({
   autorun: true,
   token: tokens.discord
@@ -60,7 +61,7 @@ bot.on('message', function (user, userID, channelID, message, event) {
     let cmd2 = cmd.join(" ");
     let begin = new Date().getTime(); // More accurate reading this way ;)
     lxc.attach(vmname, "bash -c '" + cmd2 + "'", function(out, out2, out3) {
-      say("```\n" + out2 + "```" + String(new Date().getTime() - begin) + "MS", c);
+      say("```\n" + out2.substring(0,1980) + "```" + String(new Date().getTime() - begin) + "MS", c);
     });
   }
   if(t == "<reset" || t == "<respawn" || t == ">respawn" || t == ">reset") {
