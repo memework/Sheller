@@ -10,7 +10,7 @@
   "author": "heatingdevice",
   "license": "MIT",
   "dependencies": {
-    "discord.io": "^2.5.1",
-    "lxc": "^0.1.1"
+    "child": "0.0.3",
+    "discord.io": "^2.5.1"
   }
 }
