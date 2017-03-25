@@ -11,6 +11,7 @@ try {
   var Discord = require('discord.io');
   var child_process = require('child_process');
   var child = require("child");
+  var fs = require("fs");
 } catch (e) {
   console.log("You need to run `npm i` first!");
   return;
@@ -57,7 +58,7 @@ bot.on('ready', function () {
 let timers = {};
 
 bot.on('message', function (user, userID, channelID, message, event) {
-  if(message.charAt(0) != "<" && message.charAt(0) != ">") return false; // Ignore non-commands...
+  if (message.charAt(0) != "<" && message.charAt(0) != ">") return false; // Ignore non-commands...
   let t = message.split(" ")[0].substr(1); // Remove 1st character
   let c = channelID;
   let a = message.split(" ");
@@ -78,18 +79,53 @@ bot.on('message', function (user, userID, channelID, message, event) {
         say("[WARN] Adding `-y` to APT... Remember this won't happen on the real thing!", c);
       }
     }
-    let cmd2 = cmd.join(" ");
+
+    let cmd2 = cmd.join(" ")// .replace(new RegExp('"', "gi"), "\\\"");
+    // cmd2 = cmd2.replace(/\\/gi, "\\\\");
+    // cmd2 = cmd2.replace(/#/gi, "\\#");
+    // cmd2 = cmd2.replace(/;/gi, "\\;");
+    // cmd2 = cmd2.replace(/&/gi, "\\&");
+    // cmd2 = cmd2.replace(/./gi, "\\.");
+    // cmd2 = cmd2.replace(/"/gi, '\\"');
+    // cmd2 = cmd2.replace(/'/gi, "\\'");
+    // cmd2 = cmd2.replace(/,/gi, "\\,");
+    // cmd2 = cmd2.replace(/`/gi, "\\`");
+    // cmd2 = cmd2.replace(/:/gi, "\\:");
+    // cmd2 = cmd2.replace(/!/gi, "\\!");
+    // cmd2 = cmd2.replace(/\*/gi, "\\*");
+    // cmd2 = cmd2.replace(/\?/gi, "\\?");
+    // cmd2 = cmd2.replace(/\$/gi, "\\$");
+    // cmd2 = cmd2.replace(/\(/gi, "\\\(");
+    // cmd2 = cmd2.replace(/\)/gi, "\\\)");
+
+
+    console.log(cmd2);
     let begin = new Date().getTime(); // More accurate reading this way ;)
     let tmplog = "";
-    exec("lxc-attach -n " + vmname + " -- " + cmd2, function (output) { tmplog += output }, function (error, stderr) {
-      say("```\n" + tmplog.substring(0, 1960) + "```" + String(new Date().getTime() - begin) + "MS. Code: `" + error + "`", c);
-      if(stderr) {
-        say("Stderr: ```\n" + stderr + "```", c);
+    say("Running `" + cmd2 + "`!", c);
+    let myfile = "/tmp/sheller/sheller-" + new Date().getTime() + "-" + Math.floor(Math.random() * 10000) + ".sh";
+    fs.writeFile(myfile, cmd2, function (err) { // I'm done... This isn't the most elegant solution but it seems like it's the only one that'll work without significant overhead...
+      if (err) {
+        say("Error writing file... ```\n" + err + "```");
+        console.warn(err);
+        return false;
       }
+      console.log("made file " + myfile + "!");
+      exec("lxc-attach -n " + vmname + " -- bash " + myfile, function (output) { tmplog += output }, function (error, stderr) {
+        say("```\n" + tmplog.substring(0, 1960) + "```" + String(new Date().getTime() - begin) + "MS. Code: `" + error + "`", c);
+        if (stderr) {
+          say("Stderr: ```\n" + stderr + "```", c);
+        }
+        fs.unlink(myfile, function(err2) {
+          if(err2) {
+            console.warn(err2)
+          }
+        });
+      });
     });
   }
-  if(t == "snaps") {
-    child_process.exec("lxc-snapshot -n " + vmname + " -L", function(error, stdout, stderrr) {
+  if (t == "snaps") {
+    child_process.exec("lxc-snapshot -n " + vmname + " -L", function (error, stdout, stderrr) {
       say("Available snapshots:```\n" + stdout + "```", c);
     });
   }
@@ -122,14 +158,16 @@ bot.on('message', function (user, userID, channelID, message, event) {
         console.log("Destroyed VM");
         child_process.exec("lxc-create -n " + vmname + " -t " + template + " -- " + cmdarg.join(" "), function (e_7, e_8, e_9) {
           console.log("Created new VM");
-          child_process.exec("lxc-snapshot -n " + vmname, function (e_10, e_11, e_12) {
-            console.log("Created snapshot");
-            child_process.exec("lxc-start -n " + vmname, function (e_13, e_14, e_15) {
-              // console.log(e_1, e_2, e_3, e_4, e_5, e_6, e_7, e_8, e_9, e_10, e_11, e_12, e_13, e_14, e_15);
-              console.log("Started up new VM!");
-              say("Purged old container!\n\
+          child_process.exec("lxc-start -n " + vmname + "; lxc-attach -n " + vmname + " -- mkdir -p /tmp/sheller; lxc-stop -n " + vmname, function () {
+            child_process.exec("lxc-snapshot -n " + vmname, function (e_10, e_11, e_12) {
+              console.log("Created snapshot");
+              child_process.exec("lxc-start -n " + vmname, function (e_13, e_14, e_15) {
+                // console.log(e_1, e_2, e_3, e_4, e_5, e_6, e_7, e_8, e_9, e_10, e_11, e_12, e_13, e_14, e_15);
+                console.log("Started up new VM!");
+                say("Purged old container!\n\
                   Created new container using template **" + template + "** using the arguments `" + cmdarg.join(" ") + "`\n\
                   Also created the `snap0` snapshot!", c);
+              });
             });
           });
         });
