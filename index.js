@@ -30,7 +30,7 @@ var exec = function (command, onData, onClose) {
     args: runCommand.slice(1),
     cbStdout: function (data) { onData('' + data) },
     cbStderr: function (data) { errors += data; onData('' + data) },
-    cbClose: function (exitCode) { onClose(exitCode == 0 ? null : exitCode, errors) }
+    cbClose: function (exitCode) { onClose(exitCode, errors) }
   }).start()
 }
 
@@ -81,8 +81,11 @@ bot.on('message', function (user, userID, channelID, message, event) {
     let cmd2 = cmd.join(" ");
     let begin = new Date().getTime(); // More accurate reading this way ;)
     let tmplog = "";
-    exec("lxc-attach -n " + vmname + " -- " + cmd2, function (output) { tmplog += output }, function (error) {
-      say("```\n" + tmplog.substring(0, 1980) + "```" + String(new Date().getTime() - begin) + "MS", c);
+    exec("lxc-attach -n " + vmname + " -- " + cmd2, function (output) { tmplog += output }, function (error, stderr) {
+      say("```\n" + tmplog.substring(0, 1960) + "```" + String(new Date().getTime() - begin) + "MS. Code: `" + error + "`", c);
+      if(stderr) {
+        say("Stderr: ```\n" + stderr + "```", c);
+      }
     });
   }
   if(t == "snaps") {
