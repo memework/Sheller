@@ -122,7 +122,7 @@ bot.on('message', function (user, userID, channelID, message, event) {
           child_process.exec("lxc-snapshot -n " + vmname, function (e_10, e_11, e_12) {
             console.log("Created snapshot");
             child_process.exec("lxc-start -n " + vmname, function (e_13, e_14, e_15) {
-              console.log(e_1, e_2, e_3, e_4, e_5, e_6, e_7, e_8, e_9, e_10, e_11, e_12, e_13, e_14, e_15);
+              // console.log(e_1, e_2, e_3, e_4, e_5, e_6, e_7, e_8, e_9, e_10, e_11, e_12, e_13, e_14, e_15);
               console.log("Started up new VM!");
               say("Purged old container!\n\
                   Created new container using template **" + template + "** using the arguments `" + cmdarg.join(" ") + "`\n\
