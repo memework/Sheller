@@ -10,7 +10,8 @@
   "author": "heatingdevice",
   "license": "MIT",
   "dependencies": {
-    "child": "0.0.3",
-    "discord.io": "^2.5.1"
+    "discord.io": "^2.5.1",
+    "co": "^4.6.0",
+    "virtualbox-soap": "^1.0.0"
   }
 }
