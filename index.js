@@ -266,18 +266,17 @@ bot.on('message', function (user, userID, channelID, message, event) {
 
   console.log("[" + user + "]: " + message); // Mostly for debug...
 
-  if (t == "restart") {
-    iconsole.powerDown().then(function (prog2) {
-      prog2.waitForCompletion(-1).then(function () {
-        iconsole.powerUp().then(function (prog) {
-          prog.waitForCompletion(-1).then(function () {
-            console.log(iconsole.state);
-            grabVMScreen(null, c);
-          });
-        });
-      });
-    });
-  }
+  // if (t == "restart") {
+  //   iconsole.powerDown().then(function (prog2) {
+  //     prog2.waitForCompletion(-1).then(function () {
+  //       iconsole.powerUp().then(function (prog) {
+  //         prog.waitForCompletion(-1).then(function () {
+  //           grabVMScreen(null, c);
+  //         });
+  //       });
+  //     });
+  //   });
+  // }
 
   if (t == "screengrab") {
     grabVMScreen(null, c);
@@ -307,8 +306,6 @@ bot.on('message', function (user, userID, channelID, message, event) {
       }
     }
 
-    console.log(codes);
-
     keyboard.putScancodes(codes).then(function () {
       grabVMScreen(null, c);
     }).catch(function (err) {
@@ -324,30 +321,6 @@ bot.on('message', function (user, userID, channelID, message, event) {
     for (let k in keystmp) {
       if (/[A-Z]/g.test(keystmp[k])) keys.push({ kind: "SHIFT", type: "on" });
       switch (keystmp[k]) {
-        // case "{":
-        // case "}":
-        // case "\"":
-        // case "|":
-        // case ":":
-        // case "!":
-        // case "@":
-        // case "#":
-        // case "$":
-        // case "%":
-        // case "^":
-        // case "&":
-        // case "*":
-        // case "(":
-        // case ")":
-        // case "+":
-        // case "_":
-        // case "~":
-        // case "?":
-        // case ">":
-        // case "<": {
-        //   keys.push("SHIFT");
-        // }
-
         case "{": { keys.push({ kind: "SHIFT", type: "on" }); keys.push({ kind: "[", type: "tap" }); keys.push({ kind: "SHIFT", type: "off" }); break; }
         case "}": { keys.push({ kind: "SHIFT", type: "on" }); keys.push({ kind: "]", type: "tap" }); keys.push({ kind: "SHIFT", type: "off" }); break; }
         case "\"": { keys.push({ kind: "SHIFT", type: "on" }); keys.push({ kind: "'", type: "tap" }); keys.push({ kind: "SHIFT", type: "off" }); break; }
@@ -370,30 +343,6 @@ bot.on('message', function (user, userID, channelID, message, event) {
         case "<": { keys.push({ kind: "SHIFT", type: "on" }); keys.push({ kind: ",", type: "tap" }); keys.push({ kind: "SHIFT", type: "off" }); break; }
         case ">": { keys.push({ kind: "SHIFT", type: "on" }); keys.push({ kind: ".", type: "tap" }); keys.push({ kind: "SHIFT", type: "off" }); break; }
 
-        // case "{":
-        // case "}":
-        // case "\"":
-        // case "|":
-        // case ":":
-        // case "!":
-        // case "@":
-        // case "#":
-        // case "$":
-        // case "%":
-        // case "^":
-        // case "&":
-        // case "*":
-        // case "(":
-        // case ")":
-        // case "+":
-        // case "_":
-        // case "~":
-        // case "?":
-        // case ">":
-        // case "<": {
-        //   break;
-        // }
-
         default: {
           keys.push({ kind: keystmp[k], type: "tap" });
           break;
@@ -401,12 +350,11 @@ bot.on('message', function (user, userID, channelID, message, event) {
       }
       if (/[A-Z]/g.test(keystmp[k])) keys.push({ kind: "SHIFT", type: "off" });
     }
-    console.log(keys);
 
     for (let k in keys) {
       keys[k].kind = keys[k].kind.toUpperCase();
-      if (!SCAN_CODES[keys[k]]) {
-        say("The key `" + keys[k] + "` doesn't exist! Skipping...");
+      if (!SCAN_CODES[keys[k].type]) {
+        say("The key `" + keys[k].type + "` doesn't exist! Skipping...", c);
         continue;
       }
 
