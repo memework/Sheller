@@ -13,6 +13,8 @@ try {
   var fs = require("fs");
   var virtualbox = require("virtualbox-soap");
   var co = require("co");
+  var data = require("./naughty.json");
+  var blacklist = data.blacklist;
 } catch (e) {
   console.log("You need to run `npm i` first!");
   return;
@@ -266,6 +268,8 @@ bot.on('message', function (user, userID, channelID, message, event) {
 
   console.log("[" + user + "]: " + message); // Mostly for debug...
 
+  if (blacklist.includes(userID)) return; // Ignore blacklisted users...
+
   // if (t == "restart") {
   //   iconsole.powerDown().then(function (prog2) {
   //     prog2.waitForCompletion(-1).then(function () {
@@ -280,6 +284,31 @@ bot.on('message', function (user, userID, channelID, message, event) {
 
   if (t == "screengrab") {
     grabVMScreen(null, c);
+  }
+
+  if (t == "blacklist") {
+    if (userID != "196769986071625728") {
+      say("NOPE!", c);
+      return false;
+    }
+    let mem = a[0].replace("<@", "").replace("!", "").replace(">", "");
+    blacklist.push(mem);
+    say(":ok_hand:", c);
+  }
+
+  if (t == "unblacklist") {
+    if (userID != "196769986071625728") {
+      say("NOPE!", c);
+      return false;
+    }
+    let mem = a[0].replace("<@", "").replace("!", "").replace(">", "");
+    let ind = blacklist.indexOf(mem);
+    if (ind == -1) {
+      say("Not in blacklist", c);
+      return false;
+    }
+    blacklist.splice(ind, 1);
+    say(":ok_hand", c);
   }
 
   if (t == "key") {
@@ -507,18 +536,23 @@ function say(msg, c) {
 }
 
 function cleanup() {
-  co(function* () {
-    yield session.unlockMachine();
-    setTimeout(() => {
-      co(function* () {
-        if (yield iconsole.getPowerButtonHandled()) return;
-        let progress = yield iconsole.powerDown();
-        yield progress.waitForCompletion(-1);
-        process.exit(0);
-      });
-    }, 30 * 1000);
-    yield iconsole.powerButton();
-    process.exit(0);
+  fs.writeFile("naughty.json", JSON.stringify({ blacklist: blacklist }), function (err) {
+    if (err) console.warn(err);
+    co(function* () {
+      yield session.unlockMachine();
+      setTimeout(() => {
+        co(function* () {
+          if (yield iconsole.getPowerButtonHandled()) return;
+          let progress = yield iconsole.powerDown();
+          yield progress.waitForCompletion(-1);
+          process.exit(0);
+        });
+      }, 30 * 1000);
+      yield iconsole.powerButton();
+      process.exit(0);
+    }).catch(function () {
+      process.exit(1);
+    });
   });
 };
 
