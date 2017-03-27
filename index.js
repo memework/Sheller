@@ -353,8 +353,8 @@ bot.on('message', function (user, userID, channelID, message, event) {
 
     for (let k in keys) {
       keys[k].kind = keys[k].kind.toUpperCase();
-      if (!SCAN_CODES[keys[k].type]) {
-        say("The key `" + keys[k].type + "` doesn't exist! Skipping...", c);
+      if (!SCAN_CODES[keys[k].kind]) {
+        say("The key `" + keys[k].kind + "` doesn't exist! Skipping...", c);
         continue;
       }
 
